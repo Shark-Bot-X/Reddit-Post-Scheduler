@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Reddit Post Scheduler</title>
+  <style>
+    body { font-family: sans-serif; padding: 20px; }
+    .error { color: red; }
+    label { display: block; margin-top: 10px; }
+  </style>
+</head>
+<body>
+  <h2>Schedule Reddit Post</h2>
+
+  <form id="postForm" enctype="multipart/form-data">
+    <label>Subreddit: <input type="text" name="sub" required></label>
+    <label>Title: <input type="text" name="title" required></label>
+    <label>Text: <textarea name="text"></textarea></label>
+    <label>Link: <input type="url" name="link"></label>
+    <label>Image: <input type="file" name="image" accept="image/*"></label>
+    <label>Video: <input type="file" name="video" accept="video/*"></label>
+    <label><input type="checkbox" name="like_comments"> Auto-Upvote Comments on my post</label>
+    <label><input type="checkbox" name="reply_to_comments">Auto-Reply to Comments on my post</label>
+    <label>
+      Schedule Time:
+      <input type="datetime-local" id="scheduled_time_picker">
+      <small>Leave blank to post immediately</small>
+    </label>
+
+    <div id="nowTime">Current time: </div>
+    <div class="error" id="timeError"></div>
+
+    <button type="submit">Submit</button>
+  </form>
+
+  <form id="friendMonitorForm">
+    <h3 class="section-title">👥 Monitor My Friends</h3>
+    <ul class="friend-list">
+      {% for friend in friends %}
+        <li><span class="friend">@{{ friend }}</span></li>
+      {% else %}
+        <li class="no-friends">No friends found in <code>friends.txt</code>.</li>
+      {% endfor %}
+    </ul>
+    <label><input type="checkbox" name="auto_like_friends"> Auto-Upvote new post from Friends List</label>
+    <label><input type="checkbox" name="auto_summary_friends"> Push Notification of friend's post with a summary</label>
+    <label><input type="checkbox" name="auto_comment_friends"> Auto Comment on new post from Friends</label>
+    <button type="submit">Update Monitoring Settings</button>
+  </form>
+  <script>
+    const form = document.getElementById("postForm");
+    const picker = document.getElementById("scheduled_time_picker");
+    const errorDiv = document.getElementById("timeError");
+    const nowDiv = document.getElementById("nowTime");
+
+    function updateTime() {
+      const now = new Date();
+      nowDiv.textContent = "Current time: " + now.toLocaleString();
+    }
+    setInterval(updateTime, 1000);
+    updateTime();
+
+    form.addEventListener("submit", async function (e) {
+      e.preventDefault();
+      errorDiv.textContent = "";
+
+      const formData = new FormData(form);
+      const scheduledTime = picker.value;
+      const now = new Date();
+
+      if (scheduledTime) {
+        const selectedTime = new Date(scheduledTime);
+        const diff = selectedTime - now;
+
+        if (diff < -10000) {  // more than 10 seconds in the past
+          errorDiv.textContent = "❌ Cannot schedule a post in the past. Please choose a future time.";
+          return;
+        }
+
+        formData.append("scheduled_time", selectedTime.getTime());
+      }
+
+      try {
+        const res = await fetch("/submit", {
+          method: "POST",
+          body: formData
+        });
+
+        const json = await res.json();
+        if (json.status === "success") {
+          alert("✅ Posted immediately!\nLink: " + json.link);
+        } else if (json.status === "scheduled") {
+          alert("🕐 Post scheduled for: " + json.scheduled_time);
+        } else {
+          alert("❌ Failed: " + json.message);
+        }
+      } catch (err) {
+        alert("❌ Error: " + err.message);
+      }
+    });
+      
+    const monitorForm = document.getElementById("friendMonitorForm");
+
+    monitorForm.addEventListener("submit", async function (e) {
+      e.preventDefault();
+      const formData = new FormData(monitorForm);
+
+      try {
+        const res = await fetch("/monitor-settings", {
+          method: "POST",
+          body: formData
+        });
+
+        const json = await res.json();
+        if (json.status === "success") {
+          alert("✅ Friend monitoring settings updated.");
+        } else {
+          alert("❌ Failed to update settings: " + json.message);
+        }
+      } catch (err) {
+        alert("❌ Error: " + err.message);
+      }
+    });
+  </script>
+</body>
+</html>

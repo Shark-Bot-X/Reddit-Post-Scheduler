@@ -1,0 +1,55 @@
+Reddit Post Scheduler
+Overview
+Reddit Post Scheduler is a web-based application designed to automate the scheduling and posting of content on Reddit. 
+It supports multiple post types, including text, link, image, and video posts, enabling users to plan and manage their Reddit submissions efficiently.
+
+Features
+Schedule posts to be published at specific dates and times
+Support for text, link, image, and video posts
+User-friendly interface for creating and managing scheduled posts
+Integration with Reddit API for seamless posting
+Ability to upload media files directly via the web interface
+Post status tracking and management
+
+Technologies Used
+Backend: Flask (Python)
+Reddit API integration via PRAW
+Scheduler: APScheduler
+Frontend: HTML, CSS, JavaScript
+
+Installation
+Clone the repository:
+
+bash-
+git clone https://github.com/yourusername/reddit-post-scheduler.git
+Install dependencies:
+
+bas-
+pip install -r requirements.txt
+Create a .env file in the root directory with the following environment variables:
+
+env-
+
+REDDIT_CLIENT_ID=your_reddit_client_id
+REDDIT_CLIENT_SECRET=your_reddit_client_secret
+REDDIT_USERNAME=your_reddit_username
+REDDIT_PASSWORD=your_reddit_password
+REDDIT_USER_AGENT=your_user_agent_string
+FLASK_SECRET_KEY=your_flask_secret_key
+REDDIT_CLIENT_ID and REDDIT_CLIENT_SECRET: Obtain these by creating an app on Reddit Apps.
+REDDIT_USERNAME and REDDIT_PASSWORD: Your Reddit login credentials for API authentication.
+REDDIT_USER_AGENT: A unique string to identify your app (e.g., reddit-post-scheduler by /u/yourusername).
+FLASK_SECRET_KEY: A secret key used by Flask for session management and security.
+
+
+
+Run the application:
+bash-python app.py
+Usage:
+
+Authenticate with your Reddit account via OAuth.
+Create new scheduled posts by selecting the post type and specifying content and schedule.
+Monitor and manage your queued posts through the dashboard.
+
+Contribution
+Contributions and suggestions are welcome.
